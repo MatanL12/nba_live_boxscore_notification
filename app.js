@@ -12,11 +12,13 @@ const IoSocket = require('./ioSocket');
 const NotificationHandler = require('./handlers/notificationHandler');
 const FirebaseHandler = require('./handlers/firebaseHandler');
 const BoxScore = require('./models/boxscore');
+const ApiCdnNba = require('./handlers/apiCdnNBA');
 
 
 const app = express();
 const firebaseHandler = new FirebaseHandler();
 const notificationHandler = new NotificationHandler(firebaseHandler);
+const apiHandler = new ApiCdnNba();
 
 // ---------  Middlewares  ---------
 app.use(CorsConfig);
@@ -45,7 +47,7 @@ const port = process.env.PORT || 8080;
     io.listen();
 
     notificationHandler.init();
-    const boxScore = new BoxScore(io, notificationHandler);
+    const boxScore = new BoxScore(io, notificationHandler, apiHandler);
     boxScore.run();
 
   } catch (error) {

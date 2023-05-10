@@ -1,19 +1,19 @@
 const GameBuilder = require('./gameBuilder');
 const GameAlerts = require('./gameAlerts');
-const axios = require('axios');
 
 class BoxScore {
-    constructor (socket, notificationService) {
+    constructor (socket, notificationHandler, apiHandler) {
         this.socket = socket;
         this.boxscoreDate = '';
         this.liveGames = [];
-        this.notificationService = notificationService;
+        this.notificationHandler = notificationHandler;
+        this.apiHandler = apiHandler;
     }
 
     async run () { 
         setInterval(async () => {
             try {
-                let results = await this.#fetchGamesAsync();
+                let results = await this.apiHandler.fetchData();
                 this.#updateDbGames(results.games, results.boxscoreDate);
                 this.#updateCacheGames(results.games, results.boxscoreDate);
                 this.boxscoreDate = results.boxscoreDate;
@@ -23,11 +23,6 @@ class BoxScore {
                 console.log("An error occured: " + err);
             }
         }, 3000);
-    }
-    
-    async #fetchGamesAsync () {
-        const response = await axios.get('https://cdn.nba.com/static/json/liveData/scoreboard/todaysScoreboard_00.json')
-        return ({games:response.data["scoreboard"]["games"], boxscoreDate:response.data["scoreboard"]["gameDate"]})            
     }
 
     #updateCacheGames (fetchedGames, updatedBoxscoreDate) {
@@ -48,7 +43,7 @@ class BoxScore {
 
                 this.liveGames.push(newGame);
                 this.socket.emitGameUpdate(fetchedGame);
-                newGame.on(`updateGame${fetchedGame.gameId}`, this.notificationService.notify);
+                newGame.on(`updateGame${fetchedGame.gameId}`, this.notificationHandler.notify);
             }
             else if (existGame.updateGame(fetchedGame)) {
                 this.socket.emitGameUpdate(fetchedGame);
