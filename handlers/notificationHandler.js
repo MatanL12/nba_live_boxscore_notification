@@ -12,13 +12,13 @@ class NotificationHandler {
     }
 
     async init () {
-        await this.loadAlertsFromDB();
+        await this.#loadAlertsFromDB();
     }
     
     async subscribe(alertId) {
         try {
             const alert = await Alert.findById(alertId);
-            this.addAlertToFutureAlertsObj(alert.gameId, alert);
+            this.#addAlertToFutureAlertsObj(alert.gameId, alert);
         }
         catch (err) {
             console.log(err);
@@ -26,6 +26,13 @@ class NotificationHandler {
     }
 
     notify (updatedGame) {
+        this.#moveAlertsFromFutureToPassed(updatedGame);
+        this.#sendNotificationIfCriteriaMet(updatedGame);
+        
+
+    }
+
+    #moveAlertsFromFutureToPassed(updatedGame) {
         const gameId = updatedGame.getGameId();
 
         for(let i = 0; i < this.futureAlertsObj[gameId].length; i++) {
@@ -36,20 +43,28 @@ class NotificationHandler {
                 i--;
             }
         }
+    }
 
+    #sendNotificationIfCriteriaMet(updatedGame) {
+        const gameId = updatedGame.getGameId();
         for(let i = 0; i < this.passedAlertsObj[gameId].length; i++) {
             const alert = this.passedAlertsObj[gameId][i];
             const scoreDiff = Math.abs(updatedGame.getHomeTeamScore() - updatedGame.getAwayTeamScore());
             if(scoreDiff <= alert.scoreDiff){
-                // this.firebaseHandler.sendNotification(alert.firebaseToken);
-                console.log(`Alert sent to alertId - ${alert._id}`);
+                const gameInfo = {
+                    gameId: gameId,
+                    gameTime: updatedGame.getGameClock(),
+                    homeTeamScore: updatedGame.getHomeTeamScore(),
+                    awayTeamScore: updatedGame.getAwayTeamScore()
+                }
+                this.firebaseHandler.sendNotification(alert.firebaseToken, gameInfo);
+                // console.log(`Alert sent to alertId - ${alert._id}`);
                 this.passedAlertsObj[gameId].splice(i, 1);
             }
         }
-
     }
 
-    async loadAlertsFromDB () {
+    async #loadAlertsFromDB () {
         const allGames = await GameAlerts.find();
         for(let game of allGames) {
             const allAlertsPerGame = game.alerts;
@@ -58,17 +73,17 @@ class NotificationHandler {
             this.passedAlertsObj[gameId] = [];
             for(let alert of allAlertsPerGame) {
                 const alertObj = await Alert.findById(alert._id);
-                this.addAlertToFutureAlertsObj(gameId, alertObj);
+                this.#addAlertToFutureAlertsObj(gameId, alertObj);
             }
         }
     }
 
-    async addAlertToFutureAlertsObj(gameId, alertObj) {
-        alertObj.firebaseToken = await this.extractUserFirebaseToken(alertObj.userId);
+    async #addAlertToFutureAlertsObj(gameId, alertObj) {
+        alertObj.firebaseToken = await this.#extractUserFirebaseToken(alertObj.userId);
         this.futureAlertsObj[gameId].push(alertObj);
     }
 
-    async extractUserFirebaseToken(userId) {
+    async #extractUserFirebaseToken(userId) {
         try {
             const user = await User.findById(userId);
             if(user) {

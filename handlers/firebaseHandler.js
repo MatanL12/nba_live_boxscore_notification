@@ -1,23 +1,18 @@
 const admin = require('firebase-admin');
 const serviceAccount = require('../util/serviceAccountKey.json');
-// const {initializeApp} = require("firebase/app");
-// const {getMessaging, getToken } = require("firebase/messaging");
 
-class FirebaseService {
-  constructor(config) {
-    // this.app = initializeApp(config);
-    // this.messaging = getMessaging(this.app);
-    // getToken(this.messaging, BIro8pI2OmE2N0qkUhuCjqMGQJLWAMn-ZDf4Z8DmZ4OZ4Ad8_YCLoOPElyNIkNN4J7-PFROv_l9wuPW0YtFajVA);
+class FirebaseHandler {
+  constructor() {
     admin.initializeApp({
       credential: admin.credential.cert(serviceAccount)
     });
   }
 
-  sendNotification(clientFirebaseToken) {
+  sendNotification(clientFirebaseToken, gameInfo) {
     const message = {
       notification: {
-        title: 'New Message',
-        body: 'You have a new message!'
+        title: `Notification from ${gameInfo.gameId}`,
+        body: `Game time: ${gameInfo.gameTime}, Home team score: ${gameInfo.homeTeamScore}, Away team score: ${gameInfo.awayTeamScore}`
       },
       token:clientFirebaseToken
     };
@@ -32,4 +27,4 @@ class FirebaseService {
       }
 }
 
-module.exports = FirebaseService;
+module.exports = FirebaseHandler;
