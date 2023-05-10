@@ -28,8 +28,6 @@ class NotificationHandler {
     notify (updatedGame) {
         this.#moveAlertsFromFutureToPassed(updatedGame);
         this.#sendNotificationIfCriteriaMet(updatedGame);
-        
-
     }
 
     #moveAlertsFromFutureToPassed(updatedGame) {
