@@ -1,5 +1,5 @@
 const admin = require('firebase-admin');
-const serviceAccount = require('../util/serviceAccountKey.json');
+const serviceAccount = require('../config/serviceAccountKey.json');
 
 class FirebaseHandler {
   constructor() {

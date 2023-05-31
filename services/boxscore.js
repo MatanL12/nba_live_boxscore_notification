@@ -1,5 +1,5 @@
 const GameBuilder = require('./gameBuilder');
-const GameAlerts = require('./gameAlerts');
+const GameAlerts = require('../models/gameAlerts');
 
 class BoxScore {
     constructor (socket, notificationHandler, apiHandler) {

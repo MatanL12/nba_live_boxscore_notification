@@ -5,14 +5,13 @@ const setNotificationHandler = require("./middleware/miscMiddleware");
 const ErrorHandler = require('./middleware/errorMiddleware');
 const http = require('http');
 const bodyParser = require('body-parser');
-const cron = require('./cron');
-const connectToDatabase = require('./db.js');
+const connectToDatabase = require('./util/db.js');
 
-const IoSocket = require('./ioSocket');
-const NotificationHandler = require('./handlers/notificationHandler');
-const FirebaseHandler = require('./handlers/firebaseHandler');
-const BoxScore = require('./models/boxscore');
-const ApiCdnNba = require('./handlers/apiCdnNBA');
+const IoSocket = require('./services/ioSocket');
+const NotificationHandler = require('./services/notificationHandler');
+const FirebaseHandler = require('./services/firebaseHandler');
+const BoxScore = require('./services/boxscore');
+const ApiCdnNba = require('./services/apiCdnNBA');
 
 
 const app = express();
